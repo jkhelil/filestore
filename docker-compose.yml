@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  webcrawler:
+    image: emircs/filestore-server:0.0.1 
+    restart: on-failure
+    ports:
+      - 9090:9090
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9090"]
+      timeout: 45s
+      interval: 10s
+      retries: 10

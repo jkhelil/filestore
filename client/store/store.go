@@ -37,39 +37,14 @@ func NewClient(baseURL string) *client {
 		},
 	}
 }
-// Add adds files to the store
-func (c *client) Add(files []string) error {
-//	req, err := c.multipartBody(files)
-//	c.Logger.Infof("request %v", req)
-//	if err != nil {
-//		return err
-//	}
-	bodyBuffer, contentType, err := multipartBody(files) 
-	if err != nil {
-		c.Logger.Fatalf("Could not build request %v", err)
-		return err
-	}
 
-	req, err := newStoreRequest("POST", fmt.Sprintf("%s/add", c.BaseURL), bodyBuffer)
+// newStoreRequest builds a request for the store server
+func newStoreRequest(method, url string, body *bytes.Buffer) (*http.Request, error){
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-		c.Logger.Fatalf("Could not build request %v", err)
-		return err
+		return req, err
 	}
-	req.Header.Add("Content-Type", contentType)
-
-	resp, err := c.HttpClient.Do(req)
-	if err != nil {
-		c.Logger.Fatalf("Could not get response %v", err)
-		return err
-	}
-	
-	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
-	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNoContent) || (err != nil) {
-		c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
-		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
-	}
-	return nil
+	return req, nil
 }
 
 // multipartBody adds files to a multipart writer
@@ -102,13 +77,39 @@ func multipartBody(files []string) (*bytes.Buffer, string, error) {
 //	return req, nil
 }
 
-// newStoreRequest builds a request for the store server
-func newStoreRequest(method, url string, body *bytes.Buffer) (*http.Request, error){
-	req, err := http.NewRequest(method, url, body)
+// Add adds files to the store
+func (c *client) Add(files []string) error {
+//	req, err := c.multipartBody(files)
+//	c.Logger.Infof("request %v", req)
+//	if err != nil {
+//		return err
+//	}
+	bodyBuffer, contentType, err := multipartBody(files) 
 	if err != nil {
-		return req, err
+		c.Logger.Fatalf("Could not build request %v", err)
+		return err
 	}
-	return req, nil
+
+	req, err := newStoreRequest("POST", fmt.Sprintf("%s/add", c.BaseURL), bodyBuffer)
+	if err != nil {
+		c.Logger.Fatalf("Could not build request %v", err)
+		return err
+	}
+	req.Header.Add("Content-Type", contentType)
+
+	resp, err := c.HttpClient.Do(req)
+	if err != nil {
+		c.Logger.Fatalf("Could not get response %v", err)
+		return err
+	}
+	
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated) || (err != nil) {
+		c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
+		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
+	}
+	return nil
 }
 
 // Remove removes the file from the store

@@ -12,16 +12,12 @@ func init() {
 
 // RegisterAddCommand register add subcommand and flags 
 func RegisterAddCommand() *cobra.Command {
-	var files []string
 	c := &cobra.Command{
-		Use:  "cmd",
+		Use:  "add",
 		Run: func(cmd *cobra.Command, args []string) {
 			c := store.NewClient(viper.GetString("server-url"))
-			c.Add(files)
+			c.Add(args)
 		},
 	}
-
-	c.Flags().StringSliceVarP(&files, "files", "f", []string{}, "")
-
 	return c
 }

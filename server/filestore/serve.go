@@ -101,8 +101,10 @@ func (fs *FileStore) Run() {
 
 // Add adds files to the store
 func (fs *FileStore) Add(w http.ResponseWriter, r *http.Request) {
+	fs.Logger.Infof("Adding multipart files to the store")
 	reader, err := r.MultipartReader()
 	if err != nil {
+		fs.Logger.Fatalf("%v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -114,6 +116,7 @@ func (fs *FileStore) Add(w http.ResponseWriter, r *http.Request) {
 		if part.FileName() == "" {
 			continue
 		}
+		fs.Logger.Infof("Adding file %s to the store", part.FileName())
 		dst, err := os.Create(filepath.Join(fs.StoreDir, part.FileName()))
 		defer dst.Close()
 		if err != nil {
@@ -139,12 +142,13 @@ func (fs *FileStore) List(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("- %s\n", file.Name())))
 	
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 // Remove removes files from the store
 func (fs *FileStore) Remove(w http.ResponseWriter, r *http.Request) {
+	fs.Logger.Infof("Removing file from the store")
 	fileName := r.FormValue("file")
+	fs.Logger.Infof("Removing file name %s", fileName)
 	err := os.Remove(filepath.Join(fs.StoreDir, fileName))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -155,24 +159,27 @@ func (fs *FileStore) Remove(w http.ResponseWriter, r *http.Request) {
 
 // Update updates a file in the store
 func (fs *FileStore) Update(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseMultipartForm(32 << 20); err != nil {
+	fs.Logger.Infof("Updating file in the store")
+	reader, err := r.MultipartReader()
+	if err != nil {
+		fs.Logger.Fatalf("%v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	file, handler, err := r.FormFile("file")
+	part, err := reader.NextPart()
+	if err != nil {
+		fs.Logger.Fatalf("%v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fs.Logger.Infof("Updating file %s",part.FileName())
+	dst, err := os.OpenFile(filepath.Join(fs.StoreDir,part.FileName()), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer file.Close()
-	fmt.Fprintf(w, "%v", handler.Header)
-	f, err := os.OpenFile(filepath.Join(fs.StoreDir,handler.Filename), os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer f.Close()
-	if _, err := io.Copy(f, file); err != nil {
+	defer dst.Close()
+	if _, err := io.Copy(dst, part); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

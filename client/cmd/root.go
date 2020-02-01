@@ -5,6 +5,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	addFlag(rootCmd.Flags(), &flag{name: "server-url", defaultValue: "http://localhost:9090", desc: "Filestore server url"})
+	addFlag(rootCmd.Flags(), &flag{name: "log-level", desc: "logging verbosity", defaultValue: "info"})
+}
 // rootCmd represents the base command
 var rootCmd = &cobra.Command{
 	Use:   "store",
@@ -14,15 +18,8 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// registerStoreFlags register flags for store command
-func registerStoreFlags(store *cobra.Command) {
-	addFlag(store.PersistentFlags(), &flag{name: "server-url", defaultValue: "http://localhost:9090", desc: "Filestore server url"})
-	addFlag(store.PersistentFlags(), &flag{name: "log-level", desc: "logging verbosity", defaultValue: "info"})
-}
-
 // Execute adds all child commands to the root command
 func Execute() {
-	registerStoreFlags(rootCmd)
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}

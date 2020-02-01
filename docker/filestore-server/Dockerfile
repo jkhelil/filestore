@@ -1,8 +1,8 @@
 FROM alpine:3.11
 
-COPY webcrawler-server /
-RUN chmod +x /webcrawler-server
-
-ENTRYPOINT /webcrawler-server
+COPY filestore-server /
+RUN chmod +x /filestore-server
+VOLUME /store
+ENTRYPOINT ["/filestore-server","--store-dir", "/store"]
 
 EXPOSE 8080

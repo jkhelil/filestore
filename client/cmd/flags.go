@@ -11,7 +11,6 @@ import (
 type flag struct {
 	name   string
 	desc   string
-	envVar string
 
 	defaultValue interface{}
 	required     bool
@@ -40,11 +39,9 @@ func addFlag(flagset *pflag.FlagSet, f *flag) {
 			flagset.String(f.name, "", f.desc)
 		}
 	}
-
-	if f.envVar != "" {
-		check(viper.BindEnv(f.name, f.envVar))
-	}
-
+	flagset.VisitAll(func(flag *pflag.Flag) {
+		check(viper.BindPFlag(flag.Name, flag))
+	})
 }
 
 // check prints the error & exits the program with code 1 if err is non-nil

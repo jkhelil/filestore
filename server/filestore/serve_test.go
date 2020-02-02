@@ -1,8 +1,12 @@
 package filestore
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"math/rand"
+	"path/filepath"
+	"time"
 	"testing"
 	"mime/multipart"
 	"net/http"
@@ -15,9 +19,11 @@ func TestAdd(t *testing.T) {
 	fs := NewFileStore(config)
 	pr, pw := io.Pipe()
 	writer := multipart.NewWriter(pw)
+	rand.Seed(time.Now().UnixNano())
+	fn := fmt.Sprintf("test%s.txt", randString(10))
 	go func() {
 		defer writer.Close()
-		part, _ := writer.CreateFormFile("file", "test.txt")
+		part, _ := writer.CreateFormFile("file", fn)
 		content := []byte("Test Add function")
 		part.Write(content)
 	}()
@@ -30,12 +36,21 @@ func TestAdd(t *testing.T) {
 	w := httptest.NewRecorder()
 	handler(w, req)
 	resp := w.Result()
-	t.Log("It should respond with an HTTP status code of 200")
+	t.Logf("It should respond with an HTTP status code of 200")
     if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated) {
         t.Errorf("Expected %d, received %d", 201, resp.StatusCode)
     }
-    t.Log("It should create a file named 'test.txt' in testdata folder")
-    if _, err := os.Stat("./testdata/test.txt"); os.IsNotExist(err) {
+    t.Logf("It should create a file named '%s' in testdata folder", fn)
+    if _, err := os.Stat(filepath.Join("./testdata", fn)); os.IsNotExist(err) {
         t.Error("Expected file ./testdata/test.txt' to exist")
     }
+}
+
+func randString(n int) string {
+    var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    b := make([]rune, n)
+    for i := range b {
+        b[i] = letters[rand.Intn(len(letters))]
+    }
+    return string(b)
 }

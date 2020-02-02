@@ -3,7 +3,7 @@ ROOT := $(PWD)
 GOPATH ?= $(ROOT)/../..
 
 .PHONY: allall
-allall: all build-docker-server
+allall: all docker-build-server docker-publish-server
 
 .PHONY: all
 all: clean-client clean-server build test
@@ -29,5 +29,11 @@ test: test-client test-server
 test-%: %
 	GOPATH=$(GOPATH) go test -cover -v filestore/$(<F)/...
 
-build-docker-%: %
+.PHONY: docker-build
+docker-build: docker-build-server docker-build-client
+
+docker-build-%: %
 	docker build -t $(IMAGE_REPO)/filestore-$<:$($<_VERSION) --force-rm=true --no-cache=true --pull=true -f $(ROOT)/docker/filestore-$(<F)/Dockerfile $(ROOT)/docker/filestore-$(<F)
+
+docker-publish-%: %
+	docker push $(IMAGE_REPO)/filestore-$<:$($<_VERSION)

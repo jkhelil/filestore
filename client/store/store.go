@@ -91,6 +91,7 @@ func (c *client) Add(files []string) error {
 	}
 
 	req, err := newStoreRequest("POST", fmt.Sprintf("%s/add", c.BaseURL), bodyBuffer)
+	c.Logger.Debugf("req %v", req)
 	if err != nil {
 		c.Logger.Fatalf("Could not build request %v", err)
 		return err
@@ -105,8 +106,8 @@ func (c *client) Add(files []string) error {
 	
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
+	c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated) || (err != nil) {
-		c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
 	return nil
@@ -115,7 +116,7 @@ func (c *client) Add(files []string) error {
 // Remove removes the file from the store
 func (c *client) Remove(file string) error {
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/remove?file=%s", c.BaseURL, file), nil)
-	c.Logger.Infof("req %v", req)
+	c.Logger.Debugf("req %v", req)
 	if err != nil {
 		c.Logger.Fatalf("Could not build request %v", err)
 		return err
@@ -129,8 +130,8 @@ func (c *client) Remove(file string) error {
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
+	c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNoContent) || (err != nil) {
-		c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
 	return nil
@@ -139,7 +140,7 @@ func (c *client) Remove(file string) error {
 // List lists all files in the store
 func (c *client) List() error {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/list", c.BaseURL), nil)
-	c.Logger.Infof("request %v", req)
+	c.Logger.Debugf("request %v", req)
 	if err != nil {
 		return err
 	}
@@ -150,8 +151,8 @@ func (c *client) List() error {
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
+	c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNoContent) || (err != nil) {
-		c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
 	fmt.Fprintf(os.Stdout, string(b))
@@ -160,14 +161,13 @@ func (c *client) List() error {
 
 // Update updates or create a file in the store
 func (c *client) Update(file string) error {
-	c.Logger.Infof("Updating file %s", file)
 	bodyBuffer, contentType, err := multipartBody([]string{file})
-	c.Logger.Infof("bodyBuffer %v", bodyBuffer)
 	if err != nil {
 		c.Logger.Fatalf("Could not read body %v", err)
 		return err
 	}
 	req, err := newStoreRequest("POST", fmt.Sprintf("%s/update", c.BaseURL), bodyBuffer)
+	c.Logger.Debugf("request %v", req)
 	if err != nil {
 		c.Logger.Fatalf("Could not build request %v", err)
 		return err
@@ -181,8 +181,8 @@ func (c *client) Update(file string) error {
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
+	c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNoContent) || (err != nil) {
-		c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
 	return nil

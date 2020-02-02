@@ -128,7 +128,6 @@ func (fs *FileStore) Add(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	w.WriteHeader(http.StatusCreated)
 }
 
 // List lists files in the store
@@ -139,7 +138,7 @@ func (fs *FileStore) List(w http.ResponseWriter, r *http.Request) {
 		return
     }
     for _, file := range files {
-		w.Write([]byte(fmt.Sprintf("- %s\n", file.Name())))
+		w.Write([]byte(fmt.Sprintf("%s\n", file.Name())))
 	
 	}
 }
@@ -154,7 +153,6 @@ func (fs *FileStore) Remove(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 // Update updates a file in the store
@@ -183,5 +181,4 @@ func (fs *FileStore) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }

@@ -28,20 +28,28 @@ docker run -v $STORE:/store -p 9090:9090 emircs/filestore-server:latest
 ```
 
 ## Use the client cli
-Start by building the client cli for you own architecture. The cli is build in docker/filestore-client directory
+- Download a client cli release for mac os user and add it to you path
+```bash
+curl -L -O https://github.com/jkhelil/filestore/releases/download/v0.0.1/store-darwin-amd64
+```
+- Download a client cli for linux user and add it to you path
+```bash
+curl -L -O https://github.com/jkhelil/filestore/releases/download/v0.0.1/store-linux-amd64
+```
+
 1. Add a file to the store
 ```bash
-./filestore-client add test.txt
+store add test.txt
 ```
 2. Remove file from the store
 ```bash
-./filestore-client rm test.txt
+store rm test.txt
 ```
 3. Update file in the store
 ```bash
-./filestore-client update test.txt
+store update test.txt
 ```
 4. List file in the store
 ```bash
-./filestore-client list
+store list
 ```

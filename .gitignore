@@ -1,2 +1,4 @@
 docker/filestore-client/filestore-client
 docker/filestore-server/filestore-server
+docker/filestore-client/store-darwin-amd64
+docker/filestore-client/store-linux-amd64

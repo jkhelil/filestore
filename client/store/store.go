@@ -72,18 +72,10 @@ func multipartBody(files []string) (*bytes.Buffer, string, error) {
 		return nil, "", err
 	}
 	return bodyBuffer, bodyWriter.FormDataContentType(), nil
-//	req, err := http.NewRequest("POST", fmt.Sprintf("%s/add",c.BaseURL), bodyBuffer)
-//	req.Header.Add("Content-Type", bodyWriter.FormDataContentType())
-//	return req, nil
 }
 
 // Add adds files to the store
 func (c *client) Add(files []string) error {
-//	req, err := c.multipartBody(files)
-//	c.Logger.Infof("request %v", req)
-//	if err != nil {
-//		return err
-//	}
 	bodyBuffer, contentType, err := multipartBody(files) 
 	if err != nil {
 		c.Logger.Fatalf("Could not build request %v", err)

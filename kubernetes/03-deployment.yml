@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filestore
+  namespace: filestore
+  labels:
+    component: filestore
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: filestore
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        component: filestore
+    spec:
+      containers:
+        - name: filestore
+          image: emircs/filestore-server:latest
+          imagePullPolicy: Always
+          command: ["--store-dir", "/store"]
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - mountPath: "/store"
+              name: store
+        restartPolicy: Always
+        volumes:
+        - name: store
+          persistentVolumeClaim:
+            claimName: store
+          

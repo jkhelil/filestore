@@ -53,3 +53,10 @@ store update test.txt
 ```bash
 store list
 ```
+
+## Deploy the filestore in kubernetes
+1. First you should consider an nfs server provisionner. You may take a look to https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner
+2. Apply filestore manifests
+```bash
+kubectl apply -Rf kubernetes
+```

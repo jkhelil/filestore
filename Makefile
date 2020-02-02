@@ -3,10 +3,10 @@ ROOT := $(PWD)
 GOPATH ?= $(ROOT)/../..
 
 .PHONY: allall
-allall: clean-client clean-server all
+allall: all build-docker-server
 
 .PHONY: all
-all: build test
+all: clean-client clean-server build test
 
 .PHONY: build
 build: linux-client linux-server
@@ -21,8 +21,7 @@ darwin-%: %
 darwin: darwin-client darwin-server
 
 clean-%: %
-	@rm -f $(ROOT)/docker/filestore-$(<F)/$(<F)
-	@rm -f $(ROOT)/docker/filestore-$</$<
+	@rm -f $(ROOT)/docker/filestore-$</filestore-$<
 
 .PHONY: test
 test: test-client test-server

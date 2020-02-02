@@ -1,4 +1,4 @@
-client_VERSION := 0.0.1
-server_VERSION := 0.0.1
+client_VERSION := latest
+server_VERSION := latest
 IMAGE_REPO := emircs
 

@@ -30,11 +30,11 @@ docker run -v $STORE:/store -p 9090:9090 emircs/filestore-server:latest
 ## Use the client cli
 - Download a client cli release for mac os user and add it to you path
 ```bash
-curl -L -O https://github.com/jkhelil/filestore/releases/download/v0.0.1/store-darwin-amd64
+curl -L -O https://github.com/jkhelil/filestore/releases/download/v0.0.2/store-darwin-amd64
 ```
 - Download a client cli for linux user and add it to you path
 ```bash
-curl -L -O https://github.com/jkhelil/filestore/releases/download/v0.0.1/store-linux-amd64
+curl -L -O https://github.com/jkhelil/filestore/releases/download/v0.0.2/store-linux-amd64
 ```
 
 1. Add a file to the store

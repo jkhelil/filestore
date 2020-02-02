@@ -116,6 +116,11 @@ func (fs *FileStore) Add(w http.ResponseWriter, r *http.Request) {
 		if part.FileName() == "" {
 			continue
 		}
+		fs.Logger.Infof("checking if file exist in the store")
+		if _, err = os.Stat(filepath.Join(fs.StoreDir, part.FileName())); !os.IsNotExist(err) {
+			http.Error(w, "File already exist", http.StatusConflict)
+			return
+		}
 		fs.Logger.Infof("Adding file %s to the store", part.FileName())
 		dst, err := os.Create(filepath.Join(fs.StoreDir, part.FileName()))
 		defer dst.Close()
@@ -183,3 +188,4 @@ func (fs *FileStore) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+

@@ -106,10 +106,10 @@ func (c *client) Add(files []string) error {
 	
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
-	c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated) || (err != nil) {
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
+	c.Logger.Infof("HTTPStatusCode: '%d'; ResponseMessage: '%s'", resp.StatusCode, string(b))
 	return nil
 }
 
@@ -130,10 +130,10 @@ func (c *client) Remove(file string) error {
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
-	c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNoContent) || (err != nil) {
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
+	c.Logger.Infof("HTTPStatusCode: '%d'; ResponseMessage: '%s'", resp.StatusCode, string(b))
 	return nil
 }
 
@@ -151,10 +151,10 @@ func (c *client) List() error {
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
-	c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNoContent) || (err != nil) {
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
+	c.Logger.Debugf("HTTPStatusCode: '%d'", resp.StatusCode)
 	fmt.Fprintf(os.Stdout, string(b))
 	return nil
 }
@@ -181,9 +181,9 @@ func (c *client) Update(file string) error {
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
-	c.Logger.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNoContent) || (err != nil) {
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
+	c.Logger.Infof("HTTPStatusCode: '%d'; ResponseMessage: '%s'", resp.StatusCode, string(b))
 	return nil
 }

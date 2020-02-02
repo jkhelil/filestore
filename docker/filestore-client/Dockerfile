@@ -1,6 +1,7 @@
 FROM alpine:3.11
 
-COPY webcrawler-client /
-RUN chmod +x /webcrawler-client
+COPY filestore-client /
+RUN chmod +x /filestore-client
 
-ENTRYPOINT ["/webcrawler-client", "-page"] 
+ENTRYPOINT ["/filestore-client"] 
+CMD ["--help"]

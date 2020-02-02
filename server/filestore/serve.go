@@ -132,6 +132,7 @@ func (fs *FileStore) Add(w http.ResponseWriter, r *http.Request) {
 
 // List lists files in the store
 func (fs *FileStore) List(w http.ResponseWriter, r *http.Request) {
+	fs.Logger.Infof("Listing files in the store")
 	files, err := ioutil.ReadDir(fs.StoreDir)
 	if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)

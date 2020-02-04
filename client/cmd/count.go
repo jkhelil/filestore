@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"filestore/client/store"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +17,9 @@ func RegisterCountCommand() *cobra.Command {
 		Use:  "wc",
 		Run: func(cmd *cobra.Command, args []string) {
 			c := store.NewClient()
-			c.CountWords()
+			if err := c.CountWords(); err != nil {
+				os.Exit(1)
+			}
 		},
 	}
 	return c

@@ -24,8 +24,11 @@ func TestAdd(t *testing.T) {
 	go func() {
 		defer writer.Close()
 		part, _ := writer.CreateFormFile("file", fn)
-		content := []byte("Test Add function")
-		part.Write(content)
+		content := "Test Add function"
+		_, err := io.WriteString(part, content)
+		if err != nil {
+			t.Errorf("%v", err)
+		}
 	}()
 
 	req := httptest.NewRequest("POST", "/", pr)

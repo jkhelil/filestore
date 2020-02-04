@@ -66,7 +66,10 @@ func multipartBody(files []string) (*bytes.Buffer, string, error) {
 		if err != nil {
 			return nil, "", err
 		}
-		io.Copy(part, file)
+		_, err = io.Copy(part, file)
+		if err != nil {
+			return nil, "", err
+		}
 	}
 	err := bodyWriter.Close()
 	if err != nil {
@@ -151,7 +154,7 @@ func (c *Client) List() error {
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
 	c.Logger.Debugf("HTTPStatusCode: '%d'", resp.StatusCode)
-	fmt.Fprintf(os.Stdout, string(b))
+	fmt.Fprintln(os.Stdout, string(b))
 	return nil
 }
 
@@ -207,7 +210,7 @@ func (c *Client) FreqWords() error {
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
 	c.Logger.Debugf("HTTPStatusCode: '%d'", resp.StatusCode)
-	fmt.Fprintf(os.Stdout, string(b))
+	fmt.Fprintln(os.Stdout, string(b))
 	return nil
 }
 
@@ -230,6 +233,6 @@ func (c *Client) CountWords() error {
 		return fmt.Errorf("HTTPStatusCode: '%d'; ResponseMessage: '%s'; ErrorMessage: '%v'", resp.StatusCode, string(b), err)
 	}
 	c.Logger.Debugf("HTTPStatusCode: '%d'", resp.StatusCode)
-	fmt.Fprintf(os.Stdout, string(b))
+	fmt.Fprintln(os.Stdout, string(b))
 	return nil
 }

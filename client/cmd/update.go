@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"filestore/client/store"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +17,9 @@ func RegisterUpdateCommand() *cobra.Command {
 		Use:  "update",
 		Run: func(cmd *cobra.Command, args []string) {
 			c := store.NewClient()
-			c.Update(args[0])
+			if err := c.Update(args[0]); err != nil {
+				os.Exit(1)
+			}
 		},
 	}
 	return c

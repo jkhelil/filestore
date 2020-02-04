@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"filestore/client/store"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +17,9 @@ func RegisterListCommand() *cobra.Command {
 		Use:  "ls",
 		Run: func(cmd *cobra.Command, args []string) {
 			c := store.NewClient()
-			c.List()
+			if err := c.List(); err != nil {
+				os.Exit(1)
+			}
 		},
 	}
 

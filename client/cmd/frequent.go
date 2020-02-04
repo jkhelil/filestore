@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"filestore/client/store"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +17,9 @@ func RegisterFrequentCommand() *cobra.Command {
 		Use:  "freq-words",
 		Run: func(cmd *cobra.Command, args []string) {
 			c := store.NewClient()
-			c.FreqWords()
+			if err := c.FreqWords(); err != nil {
+				os.Exit(1)
+			}
 		},
 	}
 	addFlag(c.Flags(), &flag{name: "limit", short: "n", desc: "limit for frequent words", defaultValue: 1, kind: "int"})

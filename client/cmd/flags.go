@@ -14,8 +14,6 @@ type flag struct {
 	short  string
 
 	defaultValue interface{}
-	required     bool
-
 	kind string
 }
 

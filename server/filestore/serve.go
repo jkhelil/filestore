@@ -132,11 +132,11 @@ func (fs *FileStore) Add(w http.ResponseWriter, r *http.Request) {
 		}
 		fs.Logger.Infof("Adding file %s to the store", part.FileName())
 		dst, err := os.Create(filepath.Join(fs.StoreDir, part.FileName()))
-		defer dst.Close()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		defer dst.Close()
 		if _, err := io.Copy(dst, part); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -153,8 +153,11 @@ func (fs *FileStore) List(w http.ResponseWriter, r *http.Request) {
 		return
     }
     for _, file := range files {
-		w.Write([]byte(fmt.Sprintf("%s\n", file.Name())))
-	
+		_, err = io.WriteString(w, fmt.Sprintf("%s\n", file.Name()))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
@@ -231,7 +234,11 @@ func (fs *FileStore) FreqWords(w http.ResponseWriter, r *http.Request) {
 	for rank := 0; (rank < limit && rank < len(sortedRes)); rank++ {
         word := sortedRes[rank].key
 		freq := sortedRes[rank].val
-		w.Write([]byte(fmt.Sprintf("%3d %s\n", freq, word)))
+		_, err = io.WriteString(w,fmt.Sprintf("%3d %s\n", freq, word))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
     }
 }
 
@@ -243,7 +250,11 @@ func (fs *FileStore) CountWords(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf("%3d\n", result)))
+	_, err = io.WriteString(w, fmt.Sprintf("%3d\n", result))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 

@@ -6,7 +6,7 @@ GOPATH ?= $(ROOT)/../..
 allall: all docker-build-server docker-publish-server
 
 .PHONY: all
-all: clean-client clean-server build test
+all: clean-client clean-server lint build test
 
 .PHONY: build
 build: linux-client linux-server
@@ -19,6 +19,12 @@ darwin-%: %
 
 .PHONY: darwin
 darwin: darwin-client darwin-server
+
+deps-lint:
+	@which golangci-lint > /dev/null || curl -sSL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b ${GOPATH}/bin v1.23.1
+
+lint: deps-lint
+	golangci-lint run
 
 clean-%: %
 	@rm -f $(ROOT)/docker/filestore-$</filestore-$<

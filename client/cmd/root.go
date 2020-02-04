@@ -14,7 +14,9 @@ var rootCmd = &cobra.Command{
 	Use:   "store",
 	Short: "store is a tool to operate filestore server",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Usage()
+		if err := cmd.Usage(); err != nil {
+			os.Exit(1)
+		}
 	},
 }
 

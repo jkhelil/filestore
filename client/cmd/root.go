@@ -6,8 +6,8 @@ import (
 )
 
 func init() {
-	addFlag(rootCmd.Flags(), &flag{name: "server-url", defaultValue: "http://localhost:9090", desc: "Filestore server url"})
-	addFlag(rootCmd.Flags(), &flag{name: "log-level", desc: "logging verbosity", defaultValue: "info"})
+	addFlag(rootCmd.Flags(), &flag{name: "server-url", short: "s", defaultValue: "http://localhost:9090", desc: "Filestore server url"})
+	addFlag(rootCmd.Flags(), &flag{name: "log-level", short: "l", desc: "logging verbosity", defaultValue: "info"})
 }
 // rootCmd represents the base command
 var rootCmd = &cobra.Command{

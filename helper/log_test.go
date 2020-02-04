@@ -2,10 +2,13 @@ package helper
 
 import (
 	"testing"
+
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/require"
 )
 
-func TestLoggerDefaultsToInfo(t *testing.T) {
-	l := logx.New("")
+func TestNewLogger(t *testing.T) {
+	l := NewLogger("filestore")
 
 	require.Equal(t, logrus.InfoLevel, l.Level)
 }

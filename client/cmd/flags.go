@@ -11,6 +11,7 @@ import (
 type flag struct {
 	name   string
 	desc   string
+	short  string
 
 	defaultValue interface{}
 	required     bool
@@ -22,21 +23,21 @@ func addFlag(flagset *pflag.FlagSet, f *flag) {
 	switch f.kind {
 	case "bool":
 		if f.defaultValue != nil {
-			flagset.Bool(f.name, f.defaultValue.(bool), f.desc)
+			flagset.BoolP(f.name, f.short, f.defaultValue.(bool), f.desc)
 		} else {
-			flagset.Bool(f.name, false, f.desc)
+			flagset.BoolP(f.name, f.short, false, f.desc)
 		}
 	case "int":
 		if f.defaultValue != nil {
-			flagset.Int(f.name, f.defaultValue.(int), f.desc)
+			flagset.IntP(f.name, f.short, f.defaultValue.(int), f.desc)
 		} else {
-			flagset.Int(f.name, 0, f.desc)
+			flagset.IntP(f.name, f.short, 0, f.desc)
 		}
 	default:
 		if f.defaultValue != nil {
-			flagset.String(f.name, f.defaultValue.(string), f.desc)
+			flagset.StringP(f.name, f.short, f.defaultValue.(string), f.desc)
 		} else {
-			flagset.String(f.name, "", f.desc)
+			flagset.StringP(f.name, f.short, "", f.desc)
 		}
 	}
 	flagset.VisitAll(func(flag *pflag.Flag) {

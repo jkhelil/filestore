@@ -53,6 +53,15 @@ store update test.txt
 ```bash
 store list
 ```
+5. Count words in the store
+```bash
+store wc
+```
+
+5. Get frequent words in the store(use -n for limits and asc/dsc for ordering)
+```bash
+store freq-words -n 10 --order asc
+```
 
 ## Deploy the filestore in kubernetes
 1. First you should consider an nfs server provisionner. You may take a look to https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner

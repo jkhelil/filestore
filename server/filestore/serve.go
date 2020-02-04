@@ -1,6 +1,7 @@
 package filestore
 
 import (
+	"bufio"
 	"fmt"
 	"path/filepath"
 	"io"
@@ -9,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sort"
+	"sync"
 
 	"filestore/helper"
 	"github.com/spf13/pflag"
@@ -92,6 +95,12 @@ func (fs *FileStore) Run() {
 	})
 	http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
 		fs.Update(w, r)
+	})
+	http.HandleFunc("/freqwords", func(w http.ResponseWriter, r *http.Request) {
+		fs.FreqWords(w, r)
+	})
+	http.HandleFunc("/countwords", func(w http.ResponseWriter, r *http.Request) {
+		fs.CountWords(w, r)
 	})
 	HTTPServer := &http.Server{Addr: fs.BindHTTPAddress, Handler: nil}
 	if err := HTTPServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -189,3 +198,138 @@ func (fs *FileStore) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// FreqWords return most frequent words
+func (fs *FileStore) FreqWords(w http.ResponseWriter, r *http.Request) {
+	queryValues := r.URL.Query()
+	order := queryValues.Get("order")
+	limit, err := strconv.Atoi(queryValues.Get("limit"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fs.Logger.Infof("Computing most %s frequent words in %s ordering", queryValues.Get("limit"), queryValues.Get("order"))
+	result, err := searchInDir(fs.StoreDir)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	type keyval struct {
+		key string
+		val int
+	}
+	var sortedRes []keyval
+    for k, v := range result {
+        sortedRes = append(sortedRes, keyval{k, v})
+	}
+
+	sort.Slice(sortedRes, func(i, j int) bool {
+		if order == "dsc" {
+			return sortedRes[i].val > sortedRes[j].val
+		} 
+		return sortedRes[i].val < sortedRes[j].val
+	})
+	for rank := 0; (rank < limit && rank < len(sortedRes)); rank++ {
+        word := sortedRes[rank].key
+		freq := sortedRes[rank].val
+		w.Write([]byte(fmt.Sprintf("%3d %s\n", freq, word)))
+    }
+}
+
+// CountWords counts words in the store
+func (fs *FileStore) CountWords(w http.ResponseWriter, r *http.Request) {
+	fs.Logger.Infof("Counting words in the store")
+	result, err := countInDir(fs.StoreDir)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write([]byte(fmt.Sprintf("%3d\n", result)))
+}
+
+
+// searchInDir return a map of words and their occurence inside a folder
+func searchInDir(dir string) (map[string]int, error) {
+	SuperResult := make(map[string]int)
+	filelist, err := ioutil.ReadDir(dir)
+	if err != nil {
+		helper.NewLogger("filestore").Fatalf("%v", err)
+		return nil, err
+	}
+	wg := &sync.WaitGroup{}
+	resultChan := make(chan map[string]int)
+	for _, fileinfo := range filelist {
+		wg.Add(1)
+		go searchInFile(filepath.Join(dir,fileinfo.Name()), resultChan, wg)
+	}
+	go func() {   
+		wg.Wait()
+		close(resultChan)
+	}()
+	for m := range resultChan {
+		for k, v := range m {
+			SuperResult[k] = SuperResult[k] + v
+		}
+	}
+	return SuperResult, nil
+}
+
+// searchInFile scan a file and build a map of string occurence
+func searchInFile(path string, resultChan chan map[string]int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	file, err := os.Open(path)
+	if err != nil {
+		helper.NewLogger("filestore").Fatalf("%v", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanWords)
+	result := make(map[string]int)
+	for scanner.Scan() {
+		result[scanner.Text()]++
+	}
+	resultChan <- result
+}
+
+// countInDir counts the words in a folder
+func countInDir(dir string) (int, error) {
+	filelist, err := ioutil.ReadDir(dir)
+	if err != nil {
+		helper.NewLogger("filestore").Fatalf("%v", err)
+		return 0, err
+	}
+	wg := &sync.WaitGroup{}
+	resultChan := make(chan int)
+	for _, fileinfo := range filelist {
+		wg.Add(1)
+		go countInFile(filepath.Join(dir,fileinfo.Name()), resultChan, wg)
+	}
+	go func() {   
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	SuperCount := 0
+	for i := range resultChan {
+		SuperCount = SuperCount + i
+	}
+	return SuperCount, nil
+}
+
+// countInFile counts the words in a file
+func countInFile(path string, resultChan chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	file, err := os.Open(path)
+	if err != nil {
+		helper.NewLogger("filestore").Fatalf("%v", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanWords)
+	result := 0
+	for scanner.Scan() {
+		result++
+	}
+	resultChan <- result
+}
